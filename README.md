@@ -1,3 +1,13 @@
 # slim-zfsm-container
 
-Integrate Zend\ServiceManager into Slim 3
+This component enables you to replace the default Pimple container in Slim 3
+with Zend\ServiceManager.
+
+## Usage
+
+* `composer require akrabat/rka-slim-zfsm-container`
+* update `index.php`:
+
+        $settings = [];
+        $container = new RKA\SmContainer\Container($settings);
+        $app = new \Slim\App($container);
