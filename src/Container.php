@@ -226,22 +226,6 @@ final class Container extends ServiceManager implements ContainerInterface, Arra
     }
 
     /**
-     * implement Pimple's register
-     *
-     */
-    public function register($provider, array $values = array())
-    {
-        $provider->register($this);
-
-        foreach ($values as $key => $value) {
-            $this[$key] = $value;
-        }
-
-        return $this;
-    }
-
-
-    /**
      * Sets a parameter or an object.
      *
      * Objects must be defined as Closures.
