@@ -1,12 +1,12 @@
 <?php
 /**
- * Slim Zend\ServiceManager Container
+ * An extension to Zend\ServiceManager to integrate it with Slim 3
  *
  * @link      https://github.com/akrabat/rka-slim-zfsm-container
  * @copyright Copyright © 2015 Rob Allen
  * @license   https://github.com/akrabat/rka-slim-zfsm-containerLICENSE (BSD 3-Clause License)
  */
-namespace RKA\SmContainer;
+namespace RKA\ZsmSlimContainer;
 
 use Zend\ServiceManager\ServiceManager;
 use Interop\Container\ContainerInterface;
