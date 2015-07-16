@@ -107,8 +107,7 @@ final class Container extends ServiceManager implements ContainerInterface, Arra
         });
 
         /**
-         * This service MUST return a NEW instance
-         * of \Psr\Http\Message\ServerRequestInterface.
+         * \Psr\Http\Message\ServerRequestInterface.
          */
         $this->setFactory('request',
             /**
@@ -118,13 +117,11 @@ final class Container extends ServiceManager implements ContainerInterface, Arra
              */
             function ($c) {
                 return Request::createFromEnvironment($c['environment']);
-            },
-            false // not shared
+            }
         );
 
         /**
-         * This service MUST return a NEW instance
-         * of \Psr\Http\Message\ResponseInterface.
+         * \Psr\Http\Message\ResponseInterface.
          */
         $this->setFactory('response',
             /**
@@ -137,8 +134,7 @@ final class Container extends ServiceManager implements ContainerInterface, Arra
                 $response = new Response(200, $headers);
 
                 return $response->withProtocolVersion($c['settings']['httpVersion']);
-            },
-            false // not shared
+            }
         );
 
         /**
@@ -222,7 +218,6 @@ final class Container extends ServiceManager implements ContainerInterface, Arra
         });
 
         /**
-         * This service MUST return a NEW instance of
          * \Slim\Interfaces\CallableResolverInterface
          */
         $this->setFactory('callableResolver',
@@ -233,9 +228,7 @@ final class Container extends ServiceManager implements ContainerInterface, Arra
              */
             function ($c) {
                 return new CallableResolver($c);
-            },
-
-            false // not shared
+            }
         );
     }
 
