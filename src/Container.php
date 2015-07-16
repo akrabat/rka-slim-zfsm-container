@@ -20,6 +20,7 @@ use Slim\Exception\NotFoundException;
 use Slim\Handlers\Error;
 use Slim\Handlers\NotFound;
 use Slim\Handlers\NotAllowed;
+use Slim\Handlers\Strategies\RequestResponse;
 use Slim\Http\Environment;
 use Slim\Http\Headers;
 use Slim\Http\Request;
@@ -41,6 +42,7 @@ use Slim\Interfaces\RouterInterface;
  *  - request: an instance of \Psr\Http\Message\ServerRequestInterface
  *  - response: an instance of \Psr\Http\Message\ResponseInterface
  *  - router: an instance of \Slim\Interfaces\RouterInterface
+ *  - foundHandler: an instance of \Slim\Interfaces\InvocationStrategyInterface
  *  - errorHandler: a callable with the signature: function($request, $response, $exception)
  *  - notFoundHandler: a callable with the signature: function($request, $response)
  *  - notAllowedHandler: a callable with the signature: function($request, $response, $allowedHttpMethods)
@@ -149,6 +151,18 @@ final class Container extends ServiceManager implements ContainerInterface, Arra
          */
         $this->setFactory('router', function ($c) {
             return new Router();
+        });
+
+        /**
+         * This service MUST return a SHARED instance
+         * of \Slim\Interfaces\InvocationStrategyInterface.
+         *
+         * @param Container $c
+         *
+         * @return InvocationStrategyInterface
+         */
+        $this->setFactory('foundHandler', function ($c) {
+            return new RequestResponse();
         });
 
         /**
