@@ -64,6 +64,7 @@ final class Container extends ServiceManager implements ContainerInterface, Arra
         'httpVersion' => '1.1',
         'responseChunkSize' => 4096,
         'outputBuffering' => 'append',
+        'determineRouteBeforeAppMiddleware' => false
     ];
 
 
