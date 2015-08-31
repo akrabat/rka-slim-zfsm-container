@@ -146,9 +146,7 @@ final class Container extends ServiceManager implements ContainerInterface, Arra
          *
          * @return RouterInterface
          */
-        $this->setFactory('router', function ($c) {
-            return new Router();
-        });
+        $this->setInvokableClass('router', Router::class);
 
         /**
          * This service MUST return a SHARED instance
@@ -158,9 +156,7 @@ final class Container extends ServiceManager implements ContainerInterface, Arra
          *
          * @return InvocationStrategyInterface
          */
-        $this->setFactory('foundHandler', function ($c) {
-            return new RequestResponse();
-        });
+        $this->setInvokableClass('foundHandler', RequestResponse::class);
 
         /**
          * This service MUST return a callable
@@ -177,9 +173,7 @@ final class Container extends ServiceManager implements ContainerInterface, Arra
          *
          * @return callable
          */
-        $this->setFactory('errorHandler', function ($c) {
-            return new Error();
-        });
+        $this->setInvokableClass('errorHandler', Error::class);
 
         /**
          * This service MUST return a callable
@@ -195,9 +189,7 @@ final class Container extends ServiceManager implements ContainerInterface, Arra
          *
          * @return callable
          */
-        $this->setFactory('notFoundHandler', function ($c) {
-            return new NotFound();
-        });
+        $this->setInvokableClass('notFoundHandler', NotFound::class);
 
         /**
          * This service MUST return a callable
@@ -214,9 +206,7 @@ final class Container extends ServiceManager implements ContainerInterface, Arra
          *
          * @return callable
          */
-        $this->setFactory('notAllowedHandler', function ($c) {
-            return new NotAllowed;
-        });
+        $this->setInvokableClass('notAllowedHandler', NotAllowed::class);
 
         /**
          * \Slim\Interfaces\CallableResolverInterface
