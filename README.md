@@ -12,6 +12,13 @@ with Zend\ServiceManager.
         $container = new RKA\ZsmSlimContainer\Container($settings);
         $app = new \Slim\App($container);
 
+To override the default Slim handlers (e.g. errorHandler, notFound, etc), you have to allow 
+override on the container like so:
+
+        $container->setAllowOverride(true);
+        $container['errorHandler'] = function($container) {
+        	//set-up error handler
+        };
 
 There is also an [example application][1].
 
