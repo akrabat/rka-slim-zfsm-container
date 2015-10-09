@@ -9,6 +9,7 @@
 namespace RKA\ZsmSlimContainer;
 
 use Zend\ServiceManager\ServiceManager;
+use Zend\ServiceManager\Config as ServiceManagerConfig;
 use Interop\Container\ContainerInterface;
 use ArrayAccess;
 use Interop\Container\Exception\ContainerException;
@@ -69,158 +70,81 @@ final class Container extends ServiceManager implements ContainerInterface, Arra
 
 
     /********************************************************************************
-     * Constructor sets up default Pimple services
+     * Constructor sets up default services
      *******************************************************************************/
 
     /**
      * Create new container
      *
-     * @param array $userSettings Associative array of application settings
+     * @param array $settings Associative array of settings. User settings are in a 'settings' sub-array
      */
-    public function __construct(array $userSettings = [])
+    public function __construct($settings = [])
     {
-        parent::__construct();
+        $userSettings = [];
+        if (isset($settings['settings'])) {
+            $userSettings = $settings['settings'];
+            unset($settings['settings']);
+        }
 
+        // Add settings factory that also collects the default settings
         $defaultSettings = $this->defaultSettings;
-
-        /**
-         * This service MUST return an array or an
-         * instance of \ArrayAccess.
-         *
-         * @param Container $c
-         *
-         * @return array|\ArrayAccess
-         */
-        $this->setFactory('settings', function ($c) use ($userSettings, $defaultSettings) {
+        $settings['factories']['settings'] = function ($c) use ($userSettings, $defaultSettings) {
             return array_merge($defaultSettings, $userSettings);
-        });
+        };
 
-        /**
-         * This service MUST return a shared instance
-         * of \Slim\Interfaces\Http\EnvironmentInterface.
-         *
-         * @param Container $c
-         *
-         * @return EnvironmentInterface
-         */
-        $this->setFactory('environment', function ($c) {
-            return new Environment($_SERVER);
-        });
+        // Add default services if they aren't added already
 
-        /**
-         * \Psr\Http\Message\ServerRequestInterface.
-         */
-        $this->setFactory('request',
-            /**
-             * @param Container $c
-             *
-             * @return ServerRequestInterface
-             */
-            function ($c) {
+        if (!isset($settings['environment'])) {
+            $settings['factories']['environment'] = function ($c) {
+                return new Environment($_SERVER);
+            };
+        }
+
+        if (!isset($settings['request'])) {
+            $settings['factories']['request'] = function ($c) {
                 return Request::createFromEnvironment($c['environment']);
-            }
-        );
+            };
+        }
 
-        /**
-         * \Psr\Http\Message\ResponseInterface.
-         */
-        $this->setFactory('response',
-            /**
-             * @param Container $c
-             *
-             * @return ResponseInterface
-             */
-            function ($c) {
+        if (!isset($settings['response'])) {
+            $settings['factories']['response'] = function ($c) {
                 $headers = new Headers(['Content-Type' => 'text/html']);
                 $response = new Response(200, $headers);
 
                 return $response->withProtocolVersion($c['settings']['httpVersion']);
-            }
-        );
+            };
+        }
 
-        /**
-         * This service MUST return a SHARED instance
-         * of \Slim\Interfaces\RouterInterface.
-         *
-         * @param Container $c
-         *
-         * @return RouterInterface
-         */
-        $this->setInvokableClass('router', Router::class);
+        if (!isset($settings['router'])) {
+            $settings['factories']['router'] = function ($c) {
+                return new Router();
+            };
+        }
 
-        /**
-         * This service MUST return a SHARED instance
-         * of \Slim\Interfaces\InvocationStrategyInterface.
-         *
-         * @param Container $c
-         *
-         * @return InvocationStrategyInterface
-         */
-        $this->setInvokableClass('foundHandler', RequestResponse::class);
-
-        /**
-         * This service MUST return a callable
-         * that accepts three arguments:
-         *
-         * 1. Instance of \Psr\Http\Message\ServerRequestInterface
-         * 2. Instance of \Psr\Http\Message\ResponseInterface
-         * 3. Instance of \Exception
-         *
-         * The callable MUST return an instance of
-         * \Psr\Http\Message\ResponseInterface.
-         *
-         * @param Container $c
-         *
-         * @return callable
-         */
-        $this->setInvokableClass('errorHandler', Error::class);
-
-        /**
-         * This service MUST return a callable
-         * that accepts two arguments:
-         *
-         * 1. Instance of \Psr\Http\Message\ServerRequestInterface
-         * 2. Instance of \Psr\Http\Message\ResponseInterface
-         *
-         * The callable MUST return an instance of
-         * \Psr\Http\Message\ResponseInterface.
-         *
-         * @param Container $c
-         *
-         * @return callable
-         */
-        $this->setInvokableClass('notFoundHandler', NotFound::class);
-
-        /**
-         * This service MUST return a callable
-         * that accepts three arguments:
-         *
-         * 1. Instance of \Psr\Http\Message\ServerRequestInterface
-         * 2. Instance of \Psr\Http\Message\ResponseInterface
-         * 3. Array of allowed HTTP methods
-         *
-         * The callable MUST return an instance of
-         * \Psr\Http\Message\ResponseInterface.
-         *
-         * @param Container $c
-         *
-         * @return callable
-         */
-        $this->setInvokableClass('notAllowedHandler', NotAllowed::class);
-
-        /**
-         * \Slim\Interfaces\CallableResolverInterface
-         */
-        $this->setFactory('callableResolver',
-            /**
-             * @param Container $c
-             *
-             * @return CallableResolverInterface
-             */
-            function ($c) {
+        if (!isset($settings['callableResolver'])) {
+            $settings['factories']['callableResolver'] = function ($c) {
                 return new CallableResolver($c);
-            }
-        );
+            };
+        }
+
+        if (!isset($settings['foundHandler'])) {
+            $settings['invokables']['foundHandler'] = RequestResponse::class;
+        }
+
+        if (!isset($settings['errorHandler'])) {
+            $settings['invokables']['errorHandler'] = Error::class;
+        }
+
+        if (!isset($settings['notFoundHandler'])) {
+            $settings['invokables']['notFoundHandler'] = NotFound::class;
+        }
+
+        if (!isset($settings['notAllowedHandler'])) {
+            $settings['invokables']['notAllowedHandler'] = NotAllowed::class;
+        }
+
+        $config = new ServiceManagerConfig($settings);
+        parent::__construct($config);
     }
 
     /**
