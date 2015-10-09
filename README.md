@@ -8,17 +8,41 @@ with Zend\ServiceManager.
 * `composer require akrabat/rka-slim-zfsm-container`
 * update `index.php`:
 
-        $settings = [];
+        $settings = [
+            'settings' => [
+                // user settings go here
+            ],
+            'factories' => [
+                // new SM factories go here
+            ],
+            // you can use any other SM key here too.
+        ];
         $container = new RKA\ZsmSlimContainer\Container($settings);
         $app = new \Slim\App($container);
 
-To override the default Slim handlers (e.g. errorHandler, notFound, etc), you have to allow 
-override on the container like so:
 
-        $container->setAllowOverride(true);
-        $container['errorHandler'] = function($container) {
-        	//set-up error handler
-        };
+### Overriding Slim's defaults
+
+To override the default Slim handlers (e.g. errorHandler, notFound, etc), you
+can add them to the relevant section of `$settings` before instantiating the
+container:
+
+    $settings = [
+        'factories' => [
+            'errorHandler' => function ($container) {
+                // do your own thing here
+            },
+        ],
+    ];
+    $container = new RKA\ZsmSlimContainer\Container($settings);
+    $app = new \Slim\App($container);
+
+Alternatively you can also override afterwards if you want to:
+
+    $container->setAllowOverride(true);
+    $container['errorHandler'] = function($container) {
+    	// set-up error handler
+    };
 
 There is also an [example application][1].
 
