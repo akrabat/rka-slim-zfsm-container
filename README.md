@@ -1,4 +1,4 @@
-# RKA\ZsmSlimContainer
+# Use Zend\ServiceManager with Slim 3
 
 This component enables you to replace the default Pimple container in Slim 3
 with Zend\ServiceManager.
