@@ -57,15 +57,11 @@ final class Container extends ServiceManager implements ContainerInterface, Arra
      * @var array
      */
     private $defaultSettings = [
-        'cookieLifetime' => '20 minutes',
-        'cookiePath' => '/',
-        'cookieDomain' => null,
-        'cookieSecure' => false,
-        'cookieHttpOnly' => false,
         'httpVersion' => '1.1',
         'responseChunkSize' => 4096,
         'outputBuffering' => 'append',
-        'determineRouteBeforeAppMiddleware' => false
+        'determineRouteBeforeAppMiddleware' => false,
+        'displayErrorDetails' => false,
     ];
 
 
@@ -132,7 +128,9 @@ final class Container extends ServiceManager implements ContainerInterface, Arra
         }
 
         if (!isset($settings['errorHandler'])) {
-            $settings['invokables']['errorHandler'] = Error::class;
+            $settings['factories']['errorHandler'] = function ($c) {
+                return new Error($c->get('settings')['displayErrorDetails']);
+            };
         }
 
         if (!isset($settings['notFoundHandler'])) {
@@ -210,5 +208,19 @@ final class Container extends ServiceManager implements ContainerInterface, Arra
     public function offsetUnset($id)
     {
         return $this->unregisterService($id);
+    }
+
+    /********************************************************************************
+     * Magic methods for convenience
+     *******************************************************************************/
+
+    public function __get($name)
+    {
+        return $this->get($name);
+    }
+
+    public function __isset($name)
+    {
+        return $this->has($name);
     }
 }
