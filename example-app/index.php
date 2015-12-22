@@ -20,20 +20,29 @@ if (PHP_SAPI == 'cli-server') {
 require __DIR__ . '/../vendor/autoload.php';
 
 // Instantiate the app
-$settings = [];
+$settings = [
+    'settings' => [
+        'displayErrorDetails' => true,
+    ],
+];
 $container = new RKA\ZsmSlimContainer\Container($settings);
 $app = new \Slim\App($container);
 
 // Add routes
-$app->get('/', function($request, $response, $args) {
+$app->get('/', function ($request, $response, $args) {
     $url = $this->router->pathFor('hi', ['name' => 'Rob']);
-    return $response->write("Try <a href='$url'>$url</a>");
+    $errorUrl = $this->router->pathFor('error');
+    return $response->write("Try <a href='$url'>$url</a>, or cause an <a href='$errorUrl'>error</a>!");
 })->setName('home');
 
-$app->get('/hello/{name}', function($request, $response, $args) {
+$app->get('/hello/{name}', function ($request, $response, $args) {
     $name = $request->getAttribute('name');
     return $response->write("<h1>Hello $name!</h1>");
 })->setName('hi');
+
+$app->get('/error', function ($request, $response, $args) {
+    throw new Exception("An error has occurred");
+})->setName('error');
 
 // Run
 $app->run();
