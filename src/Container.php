@@ -196,7 +196,17 @@ final class Container extends ServiceManager implements ArrayAccess
      */
     public function offsetUnset($id)
     {
-        $this->setService($id, null);
+        // Unset the alias, service or factory
+        if (isset($this->aliases[$id])) {
+            // Call set alias so that it is internally resolved
+            $this->setAlias($id, null);
+        }
+        if (isset($this->services[$id])) {
+            unset($this->services[$id]);
+        }
+        if (isset($this->factories[$id])) {
+            unset($this->factories[$id]);
+        }
     }
 
     /********************************************************************************
