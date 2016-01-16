@@ -9,7 +9,6 @@
 namespace RKA\ZsmSlimContainer;
 
 use ArrayAccess;
-use Interop\Container\ContainerInterface;
 use RuntimeException;
 use Slim\CallableResolver;
 use Slim\Handlers\Error;
@@ -40,7 +39,7 @@ use Zend\ServiceManager\ServiceManager;
  *  - notAllowedHandler: a callable with the signature: function($request, $response, $allowedHttpMethods)
  *  - callableResolver: an instance of \Slim\Interfaces\CallableResolverInterface
  */
-final class Container extends ServiceManager implements ContainerInterface, ArrayAccess
+final class Container extends ServiceManager implements ArrayAccess
 {
     /**
      * Default settings
