@@ -8,29 +8,19 @@
  */
 namespace RKA\ZsmSlimContainer;
 
-use Zend\ServiceManager\ServiceManager;
-use Zend\ServiceManager\Config as ServiceManagerConfig;
-use Interop\Container\ContainerInterface;
 use ArrayAccess;
-use Interop\Container\Exception\ContainerException;
 use RuntimeException;
-
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
-use Slim\Exception\NotFoundException;
+use Slim\CallableResolver;
 use Slim\Handlers\Error;
-use Slim\Handlers\NotFound;
 use Slim\Handlers\NotAllowed;
+use Slim\Handlers\NotFound;
 use Slim\Handlers\Strategies\RequestResponse;
 use Slim\Http\Environment;
 use Slim\Http\Headers;
 use Slim\Http\Request;
 use Slim\Http\Response;
-use Slim\CallableResolver;
 use Slim\Router;
-use Slim\Interfaces\CallableResolverInterface;
-use Slim\Interfaces\Http\EnvironmentInterface;
-use Slim\Interfaces\RouterInterface;
+use Zend\ServiceManager\ServiceManager;
 
 /**
  * Extend Zend\ServiceManager for use with Slim
@@ -49,7 +39,7 @@ use Slim\Interfaces\RouterInterface;
  *  - notAllowedHandler: a callable with the signature: function($request, $response, $allowedHttpMethods)
  *  - callableResolver: an instance of \Slim\Interfaces\CallableResolverInterface
  */
-final class Container extends ServiceManager implements ContainerInterface, ArrayAccess
+final class Container extends ServiceManager implements ArrayAccess
 {
     /**
      * Default settings
@@ -141,8 +131,7 @@ final class Container extends ServiceManager implements ContainerInterface, Arra
             $settings['invokables']['notAllowedHandler'] = NotAllowed::class;
         }
 
-        $config = new ServiceManagerConfig($settings);
-        parent::__construct($config);
+        parent::__construct($settings);
     }
 
     /**
@@ -162,16 +151,16 @@ final class Container extends ServiceManager implements ContainerInterface, Arra
     {
         if (is_object($value)) {
             if ($value instanceof \Closure) {
-                return $this->setFactory($id, $value);
+                $this->setFactory($id, $value);
             }
-            return $this->setService($id, $value);
+            $this->setService($id, $value);
         }
 
         if (is_string($value) && class_exists($value)) {
-            return $this->setInvokableClass($id, $value);
+            $this->setInvokableClass($id, $value);
         }
 
-        return $this->setService($id, $value);
+        $this->setService($id, $value);
     }
 
     /**
@@ -207,7 +196,17 @@ final class Container extends ServiceManager implements ContainerInterface, Arra
      */
     public function offsetUnset($id)
     {
-        return $this->unregisterService($id);
+        // Unset the alias, service or factory
+        if (isset($this->aliases[$id])) {
+            // Call set alias so that it is internally resolved
+            $this->setAlias($id, null);
+        }
+        if (isset($this->services[$id])) {
+            unset($this->services[$id]);
+        }
+        if (isset($this->factories[$id])) {
+            unset($this->factories[$id]);
+        }
     }
 
     /********************************************************************************
